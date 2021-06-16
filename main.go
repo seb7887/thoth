@@ -2,25 +2,25 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"os/signal"
 	"runtime"
 
 	"github.com/seb7887/thoth/broker"
 	"github.com/seb7887/thoth/config"
+	log "github.com/sirupsen/logrus"
 )
 
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	config := config.GetConfig()
 	b, err := broker.NewBroker(config)
-	log.Println(b)
 	if err != nil {
 		log.Fatal("New broker error")
 	}
 	b.Start()
 
+	defer b.Stop()
 	waitForSignal()
 	fmt.Println("Signal received, broker closed")
 }

@@ -96,7 +96,17 @@ func (c *client) ProcessPublishMessage(packet *packets.PublishPacket) {
 	}
 	typ := c.typ
 
-	// TODO: packet.Retain
+	if packet.Retain {
+		if err := c.topicsMgr.Retain(packet); err != nil {
+			log.Error("Error retaining message")
+		}
+	}
+
+	err := c.topicsMgr.Subscribers([]byte(packet.TopicName), packet.Qos, &c.subs, &c.qoss)
+	if err != nil {
+		log.Error("Error retrieving subscribers list")
+		return
+	}
 
 	if len(c.subs) == 0 {
 		return
@@ -110,11 +120,11 @@ func (c *client) ProcessPublishMessage(packet *packets.PublishPacket) {
 				if typ != CLIENT {
 					continue
 				}
-				if s.share {
-					qsub = append(qsub, i)
-				} else {
-					publish(s, packet)
-				}
+			}
+			if s.share {
+				qsub = append(qsub, i)
+			} else {
+				publish(s, packet)
 			}
 		}
 	}

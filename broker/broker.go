@@ -54,6 +54,7 @@ func NewBroker(config *config.Configuration) (*Broker, error) {
 		clusterPool: make(chan *Message),
 		config: config,
 		wpool: pool.New(config.Worker),
+		nodes: make(map[string]interface{}),
 	}
 
 	var err error
@@ -88,25 +89,27 @@ func (b *Broker) SubmitWork(clientId string, msg *Message) {
 
 func (b *Broker) Start() {
 	if b == nil {
-		log.Fatal("No")
+		log.Fatal("No Broker")
 		return
 	}
-	log.Println("hey")
-
 	go b.StartClientListening()
+}
+
+func (b *Broker) Stop() {
+	b.wpool.Stop()
 }
 
 func (b *Broker) StartClientListening() {
 	var l net.Listener
 	var err error
 	for {
-		address := ":1883"
+		address := fmt.Sprintf(":%d", b.config.Port)
 		l, err = net.Listen("tcp", address)
 		if err != nil {
 			log.Fatal("Error initializating broker")
 			return
 		}
-		fmt.Printf("Broker listening on port %d", 1883)
+		log.Printf("Broker listening on port %d", b.config.Port)
 		break
 	}
 	tmpDelay := 10 * ACCEPT_MIN_SLEEP
@@ -146,7 +149,7 @@ func (b *Broker) handleConnection(typ int, conn net.Conn) {
 		log.Fatal("received message that was not connect")
 		return
 	}
-	log.Printf("read connect from clientID: %s", msg.ClientIdentifier)
+	log.Printf("clientID: '%s' connected", msg.ClientIdentifier)
 
 	connack := packets.NewControlPacket(packets.Connack).(*packets.ConnackPacket)
 	connack.SessionPresent = msg.CleanSession
@@ -262,4 +265,30 @@ func (b *Broker) OnlineOfflineNotification(clientId string, online bool) {
 	packet.Payload = []byte(fmt.Sprintf(`{"clientId": "%s", "online": %v, "timestamp": "%s"`, clientId, online, time.Now().UTC().Format(time.RFC3339)))
 
 	b.PublishMessage(packet)
+}
+
+func (b *Broker) BroadcastSubOrUnsubMessage(packet packets.ControlPacket) {
+	b.routes.Range(func(key, value interface{}) bool {
+		r, ok := value.(*client)
+		if ok {
+			r.WritePacket(packet)
+		}
+		return true
+	})
+}
+
+func (b *Broker) CheckRemoteExist(remoteID, url string) bool {
+	exist := false
+	b.remotes.Range(func(key, value interface{}) bool {
+		v, ok := value.(*client)
+		if ok {
+			if v.route.remoteUrl == url {
+				v.route.remoteID = remoteID
+				exist = true
+				return false
+			}
+		}
+		return true
+	})
+	return exist
 }

@@ -17,7 +17,7 @@ type RouteInfo struct {
 }
 
 type Configuration struct {
-	Worker int `env:"WORKER_NUM" default:"1" json:"workerNum"`
+	Worker int `env:"WORKER_NUM" default:"1024" json:"workerNum"`
 	Port int `env:"PORT" default:"1883" json:"port"`
 	WsPort int `env:"WS_PORT" default:"1443" json:"wsPort"`
 	Cluster RouteInfo `json:"cluster"`
@@ -79,32 +79,32 @@ func loadConfigField(field reflect.Value, fieldDef reflect.StructField) error {
 			values := strings.Split(configValue, ",")
 			field.Set(reflect.ValueOf(values))
 			if !internalField(fieldDef) {
-				log.Println("Loaded configuration")
+				log.Debug("Loaded configuration")
 			}
 		case reflect.String:
 			field.SetString(configValue)
 			if !internalField(fieldDef) {
-				log.Println("Loaded configuration")
+				log.Debug("Loaded configuration")
 			}
 		case reflect.Bool:
 			boolValue, err := strconv.ParseBool(configValue)
 			if err != nil {
-				log.Println("Invalid configuration")
+				log.Error("Invalid configuration")
 			} else {
 				field.SetBool(boolValue)
 				if !internalField(fieldDef) {
-					log.Println("Loaded configuration")
+					log.Debug("Loaded configuration")
 				}
 			}
 		case reflect.Int:
 			intValue, err := strconv.Atoi(configValue)
 			if err != nil {
-				log.Println("Invalid configuration")
+				log.Error("Invalid configuration")
 			} else {
 				// Make sure the configured value meets the minimum requirements
 				field.SetInt(int64(intValue))
 				if !internalField(fieldDef) {
-					log.Println("Loaded configuration")
+					log.Debug("Loaded configuration")
 				}
 			}
 		}

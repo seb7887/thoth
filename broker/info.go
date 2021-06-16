@@ -93,20 +93,4 @@ func (c *client) ProcessInfo(packet *packets.PublishPacket) {
 	}
 
 	b.nodes = routes
-
-	b.mu.Lock()
-	for rid, rurl := range routes {
-		if rid == b.id {
-			continue
-		}
-
-		url, ok := rurl.(string)
-		if ok {
-			exist := b.CheckRemoteExist(rid, url)
-			if !exist {
-				b.connectRouter(rid, url)
-			}
-		}
-	}
-	b.mu.Unlock()
 }

@@ -13,6 +13,15 @@ func GenUniqueId() string {
 	return id.String()
 }
 
+func AddSubMap(m map[string]uint64, topic string) {
+	subNum, exist := m[topic]
+	if exist {
+		m[topic] = subNum + 1
+	} else {
+		m[topic] = 1
+	}
+}
+
 func DelSubMap(m map[string]uint64, topic string) uint64 {
 	subNum, exist := m[topic]
 	if exist {

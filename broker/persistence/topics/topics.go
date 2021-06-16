@@ -81,6 +81,10 @@ func (this *Manager) Retain(msg *packets.PublishPacket) error {
 	return this.p.Retain(msg)
 }
 
+func (this *Manager) Retained(topic []byte, msgs *[]*packets.PublishPacket) error {
+	return this.p.Retained(topic, msgs)
+}
+
 func (this *Manager) Close() error {
 	return this.p.Close()
 }

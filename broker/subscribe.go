@@ -3,6 +3,8 @@ package broker
 import (
 	"strings"
 
+	"github.com/seb7887/thoth/utils"
+
 	"github.com/eclipse/paho.mqtt.golang/packets"
 	log "github.com/sirupsen/logrus"
 )
@@ -39,7 +41,6 @@ func (c *client) processClientSubscribe(packet *packets.SubscribePacket) {
 		t := topic
 
 		// TODO: check auth for topic
-		// TODO: bridge publish
 
 		groupName := ""
 		share := false
@@ -55,7 +56,7 @@ func (c *client) processClientSubscribe(packet *packets.SubscribePacket) {
 		}
 
 		if oldSub, exist := c.subMap[t]; exist {
-			// TODO: topics manager
+			c.topicsMgr.Unsubscribe([]byte(oldSub.topic), oldSub)
 			delete(c.subMap, t)
 		}
 
@@ -67,11 +68,18 @@ func (c *client) processClientSubscribe(packet *packets.SubscribePacket) {
 			groupName: groupName,
 		}
 
-		// TODO: topics manager
+		rqos, err := c.topicsMgr.Subscribe([]byte(topic), qoss[i], sub)
+		if err != nil {
+			log.Error("subscribe error")
+			retcodes = append(retcodes, QosFailure)
+			continue
+		}
 
 		c.subMap[t] = sub
 
-		// TODO: add topic to session
+		c.session.AddTopic(t, qoss[i])
+		retcodes = append(retcodes, rqos)
+		c.topicsMgr.Retained([]byte(topic), &c.rmsgs)
 	}
 
 	suback.ReturnCodes = retcodes
@@ -81,10 +89,15 @@ func (c *client) processClientSubscribe(packet *packets.SubscribePacket) {
 		log.Error("send suback error")
 		return
 	}
-	// TODO: broadcast
 
 	// process retain message
-
+	for _, rm := range c.rmsgs {
+		if err := c.WritePacket(rm); err != nil {
+			log.Errorf("error publishing retained message: %s", err.Error())
+		} else {
+			log.Info("process retained message")
+		}
+	}
 }
 
 func (c *client) processRouterSubscribe(packet *packets.SubscribePacket) {
@@ -134,7 +147,7 @@ func (c *client) processRouterSubscribe(packet *packets.SubscribePacket) {
 		}
 
 		c.subMap[t] = sub
-		addSubMap(c.routeSubMap, topic)
+		utils.AddSubMap(c.routeSubMap, topic)
 		retcodes = append(retcodes, rqos)
 	}
 

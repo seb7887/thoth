@@ -23,7 +23,7 @@ type snode struct {
 
 func newSNode() *snode {
 	return &snode{
-		snodes: make(map[string]*snode)
+		snodes: make(map[string]*snode),
 	}
 }
 
@@ -404,7 +404,6 @@ func (this *memTopics) Close() error {
 	this.rroot = nil
 	return nil
 }
-
 
 // Returns topic level, remaining topic levels and any errors
 func nextTopicLevel(topic []byte) ([]byte, []byte, error) {

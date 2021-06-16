@@ -127,6 +127,12 @@ func (c *client) init() {
 		c.info.remoteIP, _, _ = net.SplitHostPort(ws.Request().RemoteAddr)
 	}
 	c.ctx, c.cancelFunc = context.WithCancel(context.Background())
+	c.subMap = make(map[string]*subscription)
+	c.topicsMgr = c.broker.topicsMgr
+	c.routeSubMap = make(map[string]uint64)
+	c.awaitingRel = make(map[uint16]int64)
+	c.inflight = make(map[uint16]*inflightElement)
+	c.mqueue = queue.New()
 }
 
 func (c *client) readLoop() {
@@ -159,7 +165,7 @@ func (c *client) readLoop() {
 
 			packet, err := packets.ReadPacket(nc)
 			if err != nil {
-				log.Error("read packet error")
+				log.Errorf("read packet error: %s", err.Error())
 				msg := &Message{
 					client: c,
 					packet: DisconnectedPacket,
