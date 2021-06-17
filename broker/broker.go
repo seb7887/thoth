@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/eclipse/paho.mqtt.golang/packets"
+	"github.com/seb7887/thoth/auth"
 	"github.com/seb7887/thoth/broker/persistence/sessions"
 	"github.com/seb7887/thoth/broker/persistence/topics"
 	"github.com/seb7887/thoth/config"
@@ -37,6 +38,7 @@ type Broker struct {
 	clusterPool chan *Message
 	sessionMgr *sessions.Manager
 	topicsMgr *topics.Manager
+	auth auth.Auth
 }
 
 func newMessagePool() []chan *Message {
@@ -69,6 +71,13 @@ func NewBroker(config *config.Configuration) (*Broker, error) {
 		log.Error("new session manager error")
 		return nil, err
 	}
+
+	bAuth, err := auth.NewAuth()
+	if err != nil {
+		log.Error("auth config error")
+		return nil, err
+	}
+	b.auth = bAuth
 
 	return b, nil
 }
@@ -149,7 +158,6 @@ func (b *Broker) handleConnection(typ int, conn net.Conn) {
 		log.Fatal("received message that was not connect")
 		return
 	}
-	log.Printf("clientID: '%s' connected", msg.ClientIdentifier)
 
 	connack := packets.NewControlPacket(packets.Connack).(*packets.ConnackPacket)
 	connack.SessionPresent = msg.CleanSession
@@ -164,13 +172,24 @@ func (b *Broker) handleConnection(typ int, conn net.Conn) {
 		return
 	}
 
-	// TODO: Perform auth here
+	// Authenticate
+	if typ == CLIENT && !b.auth.CheckConnect(string(msg.Username), string(msg.Password)) {
+		connack.ReturnCode = packets.ErrRefusedBadUsernameOrPassword
+		err = connack.Write(conn)
+		if err != nil {
+			log.Error("send connack error")
+			return
+		}
+		return
+	}
 
 	err = connack.Write(conn)
 	if err != nil {
-		log.Fatal("send connack error 1")
+		log.Fatal("send connack error")
 		return
 	}
+
+	log.Printf("clientID: '%s' connected", msg.ClientIdentifier)
 
 	willMsg := packets.NewControlPacket(packets.Publish).(*packets.PublishPacket)
 	if msg.WillFlag {

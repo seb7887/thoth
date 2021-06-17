@@ -55,8 +55,6 @@ func (c *client) processRouterPublish(packet *packets.PublishPacket) {
 func (c *client) processClientPublish(packet *packets.PublishPacket) {
 	//topic := packet.TopicName
 
-	// TODO: broker check auth topic
-
 	// TODO: publish RabbitMQ
 
 	switch packet.Qos {

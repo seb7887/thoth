@@ -6,4 +6,3 @@
 
 - Auth
 - RabbitMQ
-- Cluster(?)

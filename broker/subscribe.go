@@ -40,8 +40,6 @@ func (c *client) processClientSubscribe(packet *packets.SubscribePacket) {
 	for i, topic := range topics {
 		t := topic
 
-		// TODO: check auth for topic
-
 		groupName := ""
 		share := false
 		if strings.HasPrefix(topic, "$share/") {
