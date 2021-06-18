@@ -1,7 +1,11 @@
 package broker
 
 import (
+	"strings"
+	"time"
+
 	"github.com/eclipse/paho.mqtt.golang/packets"
+	rb "github.com/seb7887/thoth/rabbitmq"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -53,9 +57,21 @@ func (c *client) processRouterPublish(packet *packets.PublishPacket) {
 }
 
 func (c *client) processClientPublish(packet *packets.PublishPacket) {
-	//topic := packet.TopicName
-
-	// TODO: publish RabbitMQ
+	// publish to RabbitMQ if not /config or /command topics
+	topic := string(packet.TopicName)
+	isConfig := strings.Contains(topic, "config")
+	isCommand := strings.Contains(topic, "command")
+	if !isConfig && !isCommand {
+		err := rb.PublishToStream(&rb.QueueMessage{
+			Topic: topic,
+			ClientId: c.info.clientId,
+			Payload: string(packet.Payload),
+			Timestamp: time.Now().Unix(),
+		})
+		if err != nil {
+			log.Error(err.Error())
+		}
+	}
 
 	switch packet.Qos {
 	case QosAtMostOnce:

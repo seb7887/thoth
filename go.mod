@@ -10,5 +10,6 @@ require (
 	github.com/joho/godotenv v1.3.0
 	github.com/segmentio/fasthash v1.0.3
 	github.com/sirupsen/logrus v1.8.1
+	github.com/streadway/amqp v1.0.0
 	golang.org/x/net v0.0.0-20200425230154-ff2c4b7c35a0
 )
