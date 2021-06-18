@@ -63,9 +63,9 @@ func (c *client) processClientPublish(packet *packets.PublishPacket) {
 	isCommand := strings.Contains(topic, "command")
 	if !isConfig && !isCommand {
 		err := rb.PublishToStream(&rb.QueueMessage{
-			Topic: topic,
-			ClientId: c.info.clientId,
-			Payload: string(packet.Payload),
+			Topic:     topic,
+			ClientId:  c.info.clientId,
+			Payload:   string(packet.Payload),
 			Timestamp: time.Now().Unix(),
 		})
 		if err != nil {

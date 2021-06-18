@@ -29,7 +29,7 @@ func waitForSignal() os.Signal {
 	signalChan := make(chan os.Signal, 1)
 	defer close(signalChan)
 	signal.Notify(signalChan, os.Kill, os.Interrupt)
-	s := <- signalChan
+	s := <-signalChan
 	signal.Stop(signalChan)
 	return s
 }

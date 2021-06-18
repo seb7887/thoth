@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	MessagePoolNum = 1024
+	MessagePoolNum        = 1024
 	MessagePoolMessageNum = 1024
 )
 
@@ -27,18 +27,18 @@ type Message struct {
 }
 
 type Broker struct {
-	id string
-	mu sync.Mutex
-	config *config.Configuration
-	wpool *pool.WorkerPool
-	clients sync.Map
-	routes sync.Map
-	remotes sync.Map
-	nodes map[string]interface{}
+	id          string
+	mu          sync.Mutex
+	config      *config.Configuration
+	wpool       *pool.WorkerPool
+	clients     sync.Map
+	routes      sync.Map
+	remotes     sync.Map
+	nodes       map[string]interface{}
 	clusterPool chan *Message
-	sessionMgr *sessions.Manager
-	topicsMgr *topics.Manager
-	auth auth.Auth
+	sessionMgr  *sessions.Manager
+	topicsMgr   *topics.Manager
+	auth        auth.Auth
 }
 
 func newMessagePool() []chan *Message {
@@ -52,11 +52,11 @@ func newMessagePool() []chan *Message {
 
 func NewBroker(config *config.Configuration) (*Broker, error) {
 	b := &Broker{
-		id: utils.GenUniqueId(),
+		id:          utils.GenUniqueId(),
 		clusterPool: make(chan *Message),
-		config: config,
-		wpool: pool.New(config.Worker),
-		nodes: make(map[string]interface{}),
+		config:      config,
+		wpool:       pool.New(config.Worker),
+		nodes:       make(map[string]interface{}),
 	}
 
 	var err error
@@ -201,20 +201,20 @@ func (b *Broker) handleConnection(typ int, conn net.Conn) {
 	} else {
 		willMsg = nil
 	}
-	
+
 	info := info{
-		clientId: msg.ClientIdentifier,
-		username: msg.Username,
-		password: string(msg.Password),
+		clientId:  msg.ClientIdentifier,
+		username:  msg.Username,
+		password:  string(msg.Password),
 		keepalive: msg.Keepalive,
-		willMsg: willMsg,
+		willMsg:   willMsg,
 	}
 
 	c := &client{
-		typ: typ,
+		typ:    typ,
 		broker: b,
-		conn: conn,
-		info: info,
+		conn:   conn,
+		info:   info,
 	}
 
 	c.init()

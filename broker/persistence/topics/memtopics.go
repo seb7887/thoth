@@ -16,8 +16,8 @@ const (
 )
 
 type snode struct {
-	subs []interface{}
-	qos []byte
+	subs   []interface{}
+	qos    []byte
 	snodes map[string]*snode
 }
 
@@ -164,7 +164,7 @@ func (this *snode) smatch(topic []byte, qos byte, subs *[]interface{}, qoss *[]b
 }
 
 type rnode struct {
-	msg *packets.PublishPacket
+	msg    *packets.PublishPacket
 	rnodes map[string]*rnode
 }
 
@@ -304,12 +304,11 @@ const (
 	stateSYS             // System level topic ($)
 )
 
-
 type memTopics struct {
-	smu sync.RWMutex // sub/unsub mutex
-	sroot *snode // subscription tree
-	rmu sync.RWMutex // retained messages mutex
-	rroot *rnode // retained messages tree
+	smu   sync.RWMutex // sub/unsub mutex
+	sroot *snode       // subscription tree
+	rmu   sync.RWMutex // retained messages mutex
+	rroot *rnode       // retained messages tree
 }
 
 var _TopicProvider = (*memTopics)(nil)

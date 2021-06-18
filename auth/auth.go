@@ -4,7 +4,7 @@ type Auth interface {
 	CheckConnect(username, password string) bool
 }
 
-type AuthClient struct {}
+type AuthClient struct{}
 
 func NewAuth() (Auth, error) {
 	return &AuthClient{}, nil

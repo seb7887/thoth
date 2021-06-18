@@ -10,9 +10,9 @@ import (
 )
 
 type QueueMessage struct {
-	ClientId string
-	Topic string
-	Payload string
+	ClientId  string
+	Topic     string
+	Payload   string
 	Timestamp int64
 }
 

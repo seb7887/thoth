@@ -45,7 +45,7 @@ func (c *client) ensureRetryTimer(interval ...int64) {
 	}
 
 	c.retryTimerLock.Lock()
-	c.retryTimer = time.AfterFunc(time.Duration(timerInterval) * time.Second, c.retryDelivery)
+	c.retryTimer = time.AfterFunc(time.Duration(timerInterval)*time.Second, c.retryDelivery)
 	c.retryTimerLock.Unlock()
 	return
 }

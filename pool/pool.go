@@ -7,11 +7,11 @@ import (
 )
 
 type WorkerPool struct {
-	maxWorkers int
-	taskQueue []chan func()
+	maxWorkers  int
+	taskQueue   []chan func()
 	stoppedChan chan struct{}
-	ctx context.Context
-	cancel context.CancelFunc
+	ctx         context.Context
+	cancel      context.CancelFunc
 }
 
 func New(maxWorkers int) *WorkerPool {
@@ -24,11 +24,11 @@ func New(maxWorkers int) *WorkerPool {
 
 	// taskQueue is unbuffered since items are always removed immediately
 	pool := &WorkerPool{
-		taskQueue: make([]chan func(), maxWorkers),
-		maxWorkers: maxWorkers,
+		taskQueue:   make([]chan func(), maxWorkers),
+		maxWorkers:  maxWorkers,
 		stoppedChan: make(chan struct{}),
-		ctx: ctx,
-		cancel: cancel,
+		ctx:         ctx,
+		cancel:      cancel,
 	}
 
 	// start the task dispatcher
@@ -44,7 +44,7 @@ func (p *WorkerPool) Stop() {
 func (p *WorkerPool) Submit(uid string, task func()) {
 	idx := fnv1a.HashString64(uid) % uint64(p.maxWorkers)
 	if task != nil {
-		p.taskQueue[idx] <-task
+		p.taskQueue[idx] <- task
 	}
 }
 

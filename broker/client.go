@@ -19,23 +19,22 @@ import (
 	"golang.org/x/net/websocket"
 )
 
-
 const (
 	BrokerInfoTopic = "broker000100101info" // special pub topic for cluster info BrokerInfoTopic
-	CLIENT = 0 // end-user
-	ROUTER = 1 // another router in the cluster
-	REMOTE = 2 // the router connect to other router
-	CLUSTER = 3
+	CLIENT          = 0                     // end-user
+	ROUTER          = 1                     // another router in the cluster
+	REMOTE          = 2                     // the router connect to other router
+	CLUSTER         = 3
 )
 
 const (
-	Connected = 1
+	Connected    = 1
 	Disconnected = 2
 )
 
 const (
 	awaitRelTimeout int64 = 20
-	retryInterval int64 = 20
+	retryInterval   int64 = 20
 )
 
 const (
@@ -50,67 +49,67 @@ type InflightStatus uint8
 
 const (
 	Publish InflightStatus = 0
-	Pubrel InflightStatus = 1
+	Pubrel  InflightStatus = 1
 )
 
 var (
 	DisconnectedPacket = packets.NewControlPacket(packets.Disconnect).(*packets.DisconnectPacket)
-	r = rand.New(rand.NewSource(time.Now().UnixNano()))
+	r                  = rand.New(rand.NewSource(time.Now().UnixNano()))
 )
 
 type info struct {
-	clientId string
-	username string
-	password string
+	clientId  string
+	username  string
+	password  string
 	keepalive uint16
-	willMsg *packets.PublishPacket
-	localIP string
-	remoteIP string
+	willMsg   *packets.PublishPacket
+	localIP   string
+	remoteIP  string
 }
 
 type inflightElement struct {
-	status InflightStatus
-	packet *packets.PublishPacket
+	status    InflightStatus
+	packet    *packets.PublishPacket
 	timestamp int64
 }
 
 type route struct {
-	remoteID string
+	remoteID  string
 	remoteUrl string
 }
 
 type client struct {
-	typ int
-	mu sync.Mutex
-	broker *Broker
-	conn net.Conn
-	info info
-	status int
-	qoss []byte
-	subs []interface{}
-	subMap map[string]*subscription
-	rmsgs []*packets.PublishPacket
-	route route
-	routeSubMap map[string]uint64
-	awaitingRel map[uint16]int64
+	typ            int
+	mu             sync.Mutex
+	broker         *Broker
+	conn           net.Conn
+	info           info
+	status         int
+	qoss           []byte
+	subs           []interface{}
+	subMap         map[string]*subscription
+	rmsgs          []*packets.PublishPacket
+	route          route
+	routeSubMap    map[string]uint64
+	awaitingRel    map[uint16]int64
 	maxAwaitingRel int
-	ctx context.Context
-	cancelFunc context.CancelFunc
-	inflightMu sync.RWMutex
-	inflight map[uint16]*inflightElement
-	retryTimer *time.Timer
+	ctx            context.Context
+	cancelFunc     context.CancelFunc
+	inflightMu     sync.RWMutex
+	inflight       map[uint16]*inflightElement
+	retryTimer     *time.Timer
 	retryTimerLock sync.Mutex
-	mqueue *queue.Queue
-	topicsMgr *topics.Manager
-	sessionMgr *sessions.Manager
-	session *sessions.Session
+	mqueue         *queue.Queue
+	topicsMgr      *topics.Manager
+	sessionMgr     *sessions.Manager
+	session        *sessions.Session
 }
 
 type subscription struct {
-	client *client
-	topic string
-	qos byte
-	share bool
+	client    *client
+	topic     string
+	qos       byte
+	share     bool
 	groupName string
 }
 
@@ -192,7 +191,7 @@ func (c *client) readLoop() {
 // extractPacketFields function reads a control packet and extracts only the fields
 // that needs to pass on UTF-8 validation
 func extractPacketFields(msgPacket packets.ControlPacket) []string {
-	var fields [] string
+	var fields []string
 
 	// Get packet type
 	switch msgPacket.(type) {
@@ -425,7 +424,7 @@ func (c *client) expireAwaitingRel() {
 
 	now := time.Now().Unix()
 	for packetId, Timestamp := range c.awaitingRel {
-		if now - Timestamp >= awaitRelTimeout {
+		if now-Timestamp >= awaitRelTimeout {
 			log.Error("Dropped qos2 packet for await_rel_timeout")
 			delete(c.awaitingRel, packetId)
 		}

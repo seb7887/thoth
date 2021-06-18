@@ -59,10 +59,10 @@ func (c *client) processClientSubscribe(packet *packets.SubscribePacket) {
 		}
 
 		sub := &subscription{
-			topic: topic,
-			qos: qoss[i],
-			client: c,
-			share: share,
+			topic:     topic,
+			qos:       qoss[i],
+			client:    c,
+			share:     share,
 			groupName: groupName,
 		}
 
