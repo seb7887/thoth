@@ -61,16 +61,15 @@ func (c *client) processClientPublish(packet *packets.PublishPacket) {
 	topic := string(packet.TopicName)
 	isConfig := strings.Contains(topic, "config")
 	isCommand := strings.Contains(topic, "command")
-	if !isConfig && !isCommand {
-		err := rb.PublishToStream(&rb.QueueMessage{
+	bridgeEnabled := c.broker.config.BridgeEnabled
+
+	if !isConfig && !isCommand && bridgeEnabled {
+		rb.PublishToStream(&rb.QueueMessage{
 			Topic:     topic,
 			ClientId:  c.info.clientId,
 			Payload:   string(packet.Payload),
 			Timestamp: time.Now().Unix(),
 		})
-		if err != nil {
-			log.Error(err.Error())
-		}
 	}
 
 	switch packet.Qos {

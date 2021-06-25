@@ -17,11 +17,12 @@ type RouteInfo struct {
 }
 
 type Configuration struct {
-	Worker  int       `env:"WORKER_NUM" default:"1024" json:"workerNum"`
-	Port    int       `env:"PORT" default:"1883" json:"port"`
-	WsPort  int       `env:"WS_PORT" default:"1443" json:"wsPort"`
-	Cluster RouteInfo `json:"cluster"`
-	AMQPUrl string    `env:"AMQP_URL" json:"amqpUrl"`
+	Worker        int       `env:"WORKER_NUM" default:"1024" json:"workerNum"`
+	Port          int       `env:"PORT" default:"1883" json:"port"`
+	WsPort        int       `env:"WS_PORT" default:"1443" json:"wsPort"`
+	Cluster       RouteInfo `json:"cluster"`
+	AMQPUrl       string    `env:"AMQP_URL" json:"amqpUrl"`
+	BridgeEnabled bool      `env:"BRIDGE_ENABLED" default:"false" json:"bridgeEnabled"`
 	// TODO: add auth params
 }
 

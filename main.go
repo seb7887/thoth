@@ -8,6 +8,7 @@ import (
 
 	"github.com/seb7887/thoth/broker"
 	"github.com/seb7887/thoth/config"
+	rb "github.com/seb7887/thoth/rabbitmq"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -18,7 +19,12 @@ func main() {
 	if err != nil {
 		log.Fatal("New broker error")
 	}
-	b.Start()
+
+	// RabbitMQ Producer
+	go rb.InitProducer()
+
+	// MQTT Broker
+	go b.Start()
 
 	defer b.Stop()
 	waitForSignal()

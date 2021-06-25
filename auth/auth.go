@@ -11,5 +11,5 @@ func NewAuth() (Auth, error) {
 }
 
 func (a *AuthClient) CheckConnect(username, password string) bool {
-	return username == "testUser" && password == "testPwd"
+	return true
 }
