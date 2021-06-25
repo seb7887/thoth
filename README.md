@@ -30,6 +30,6 @@ TODO
 
 ## TODO
 
-- Integrate Auth
 - Dockerize
 - CI/CD
+- gRPC client connection pool

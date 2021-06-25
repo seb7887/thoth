@@ -20,8 +20,10 @@ func main() {
 		log.Fatal("New broker error")
 	}
 
-	// RabbitMQ Producer
-	go rb.InitProducer()
+	if config.BridgeEnabled {
+		// RabbitMQ Producer
+		go rb.InitProducer()
+	}
 
 	// MQTT Broker
 	go b.Start()
