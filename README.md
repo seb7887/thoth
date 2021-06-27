@@ -30,6 +30,5 @@ TODO
 
 ## TODO
 
-- Dockerize
-- CI/CD
+- docs
 - gRPC client connection pool
