@@ -16,7 +16,7 @@ type QueueMessage struct {
 }
 
 const (
-	producer = "producer"
+	consumer = "consumer"
 )
 
 // channel to publish RabbitMQ messages
@@ -47,7 +47,7 @@ func InitProducer() {
 			// publish message
 			err = ch.Publish(
 				"",       // exchange
-				producer, // routing key
+				consumer, // routing key
 				false,    // mandatory
 				false,    // immediate
 				message,  // message to be published
