@@ -68,7 +68,7 @@ func (c *client) processClientPublish(packet *packets.PublishPacket) {
 			Topic:     topic,
 			ClientId:  c.info.clientId,
 			Payload:   string(packet.Payload),
-			Timestamp: time.Now().Unix(),
+			Timestamp: time.Now().UnixNano() / (int64(time.Millisecond)/int64(time.Nanosecond)),
 		})
 	}
 
