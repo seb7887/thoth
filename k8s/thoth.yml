@@ -1,0 +1,59 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: thoth-config
+  labels:
+    app: thoth
+data:
+  WORKER_NUM: "4096"
+  PORT: "1883"
+  AMQP_URL: "amqp://guest:guest@rabbitmq-server:5672"
+  BRIDGE_ENABLED: "true"
+  HEIMDALLR_KEY: "Rpcksf2ZjnEphYR4iFevmzw1w87lGpXf"
+  HEIMDALLR_HOST: "heimdallr.default.svc.cluster.local"
+  HEIMDALLR_PORT: "7001"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: thoth
+  labels:
+    app: thoth
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: thoth
+  template:
+    metadata:
+      labels:
+        app: thoth
+    spec:
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      containers:
+        - name: thoth
+          image: seb7887/thoth:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 1883
+          envFrom:
+            - configMapRef:
+                name: thoth-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: thoth
+  labels:
+    app: thoth
+spec:
+  selector:
+    app: thoth
+  ports:
+    - protocol: TCP
+      port: 1883
+      targetPort: 1883
+  type: ClusterIP
+  sessionAffinity: ClientIP
